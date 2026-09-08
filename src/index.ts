@@ -1,16 +1,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { createLexer } from './lexer/lexer';
+import { TokenType } from './lexer/token';
 
 function main() {
     const args = process.argv.slice(2);
 
+    const wantsTokens = args.includes('--tokens');
+    const fileArg = args.find(a=> !a.startsWith('--'));
 
-    if(args.length === 0){
+
+    if(!fileArg || args.length === 0){
         console.error('Usage: samjs <file.js>');
         process.exit(1);
     }
 
-    const filePath = path.resolve(args[0]);
+    const filePath = path.resolve(fileArg);
 
 
     if(!fs.existsSync(filePath)){
@@ -19,7 +24,17 @@ function main() {
     }
 
     const code = fs.readFileSync(filePath, 'utf-8');
-    console.log(code);
+
+    if(wantsTokens){
+        const tokens = createLexer(code).tokenize();
+        for (const t of tokens){
+            const pos = `${t.line}:${t.column}`.padEnd(6);
+            console.log(`${pos} ${TokenType[t.type].padEnd(12)} '${t.value}'`);
+        }
+    } else{
+        console.log(code);
+    }
+
 }
 
 main();
