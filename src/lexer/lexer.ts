@@ -15,6 +15,15 @@ const KEYWORDS: Record<string, TokenType> = {
     null: TokenType.NULL,
 }
 
+const SINGLE_CHAR_TOKENS: Record<string, TokenType> = {
+    '=': TokenType.ASSIGN,
+    '+': TokenType.PLUS,
+    ';': TokenType.SEMICOLON,
+    '.': TokenType.DOT,
+    '(': TokenType.LEFT_PAREN,
+    ')': TokenType.RIGHT_PAREN,
+};
+
 
 export function createLexer(source: string) {
     let position = 0;
@@ -74,13 +83,13 @@ export function createLexer(source: string) {
         const startColumn = column;
         let value = '';
 
-        while(isDigit(currentChar())){
+        while (isDigit(currentChar())) {
             value += advance();
         }
 
-        if(currentChar() === '.' && isDigit(peekChar())){
+        if (currentChar() === '.' && isDigit(peekChar())) {
             value += advance();
-            while(isDigit(currentChar())){
+            while (isDigit(currentChar())) {
                 value += advance();
             }
         }
@@ -99,7 +108,7 @@ export function createLexer(source: string) {
         const startColumn = column;
         let value = '';
 
-        while (isAlphaNumeric(currentChar())){
+        while (isAlphaNumeric(currentChar())) {
             value += advance();
         }
 
@@ -128,13 +137,19 @@ export function createLexer(source: string) {
             const startColumn = column;
             const c = currentChar();
 
-            if(isDigit(c)){
+            if (isDigit(c)) {
                 tokens.push(readNumber());
                 continue;
             }
 
-            if(isAlpha(c)){
+            if (isAlpha(c)) {
                 tokens.push(readIdentifier());
+                continue;
+            }
+
+            if (c !== null && SINGLE_CHAR_TOKENS[c]) {
+                tokens.push(createToken(SINGLE_CHAR_TOKENS[c], c, startLine, startColumn));
+                advance();
                 continue;
             }
 
