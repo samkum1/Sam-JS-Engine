@@ -3,6 +3,8 @@ import * as path from 'path';
 import { createLexer } from './lexer/lexer';
 import { TokenType } from './lexer/token';
 import { createParser } from './parser/parser';
+import { createConsole } from './runtime/console';
+import { interpret } from './interpreter/interpreter';
 
 function main() {
     const args = process.argv.slice(2);
@@ -37,9 +39,10 @@ function main() {
         const program = createParser(createLexer(code).tokenize()).parseProgram()
         console.log(JSON.stringify(program, null, 2))
     }else{
-        console.log(code);
+        const env = new Map();
+        env.set('console', createConsole());
+        interpret(createParser(createLexer(code).tokenize()).parseProgram(), env);
     }
-
 }
 
 main();
