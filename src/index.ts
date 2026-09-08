@@ -2,11 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createLexer } from './lexer/lexer';
 import { TokenType } from './lexer/token';
+import { createParser } from './parser/parser';
 
 function main() {
     const args = process.argv.slice(2);
 
     const wantsTokens = args.includes('--tokens');
+    const wantsAst = args.includes('--ast');
     const fileArg = args.find(a=> !a.startsWith('--'));
 
 
@@ -31,7 +33,10 @@ function main() {
             const pos = `${t.line}:${t.column}`.padEnd(6);
             console.log(`${pos} ${TokenType[t.type].padEnd(12)} '${t.value}'`);
         }
-    } else{
+    } else if (wantsAst){
+        const program = createParser(createLexer(code).tokenize()).parseProgram()
+        console.log(JSON.stringify(program, null, 2))
+    }else{
         console.log(code);
     }
 
